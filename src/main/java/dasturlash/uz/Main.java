@@ -32,7 +32,7 @@ public class Main {
 //
 //        factory.close();
 
-        ApplicationContext context = new ClassPathXmlApplicationContext("spring-config.xml");
+        ApplicationContext context = new AnnotationConfigApplicationContext(SpringConfig.class);
 
         MainController mainController1 = (MainController) context.getBean("mainController");
         mainController1.start();

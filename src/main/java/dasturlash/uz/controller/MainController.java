@@ -7,16 +7,17 @@ import dasturlash.uz.service.BookService;
 import dasturlash.uz.service.CategoryService;
 import dasturlash.uz.service.InitService;
 import dasturlash.uz.util.ScannerUtil;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 
 
+@Setter
 @Controller
 public class MainController {
     @Autowired
-//    @Qualifier("mmCC")
     private BookService bookService;
     @Autowired
     private AuthService authService;
@@ -25,11 +26,11 @@ public class MainController {
 
     // lesson finished
     public void start() {
-        InitService initService = new InitService();
-
-        initService.initCreateFile();
-        initService.initAdmin();
-        initService.initTestStudent();
+//        InitService initService = new InitService();
+//
+//        initService.initCreateFile();
+//        initService.initAdmin();
+//        initService.initTestStudent();
 
         boolean loop = true;
         while (loop) {
@@ -122,15 +123,4 @@ public class MainController {
         bookService.byCategoryId(categoryId);
     }
 
-    public void setBookService(BookService bookService) {
-        this.bookService = bookService;
-    }
-
-    public void setAuthService(AuthService authService) {
-        this.authService = authService;
-    }
-
-    public void setCategoryService(CategoryService categoryService) {
-        this.categoryService = categoryService;
-    }
 }

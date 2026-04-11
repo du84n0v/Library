@@ -23,8 +23,6 @@ public class ProfileValidationUtil {
         // 998 91 555 66 77
         if (profile.getPhone() == null
                 || profile.getPhone().isBlank()
-                || profile.getPhone().length() != 12
-                || !profile.getPhone().startsWith("998")
                 || !isOnlyNumber(profile.getPhone())) {
             System.out.println("Phone is wrong.");
             return false;

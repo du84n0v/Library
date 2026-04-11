@@ -5,8 +5,13 @@ import dasturlash.uz.dto.Category;
 import dasturlash.uz.dto.Profile;
 import dasturlash.uz.enums.ProfileRole;
 import dasturlash.uz.enums.ProfileStatus;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import javax.persistence.Query;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -23,41 +28,30 @@ import java.util.stream.Stream;
 @Repository
 public class ProfileRepository {
 
-    private Integer profId = 1;
+    @Autowired
+    private SessionFactory factory;
 
     public Profile getByLogin(String login) {
-        try {
-            Stream<String> stream = Files.lines(Paths.get("profile.txt"));
-            return stream.filter(line -> {
-                String[] str = line.split("#");
-                return str[3].equals(login);
-            }).map(line -> {
-                String[] str = line.split("#");
-                Profile profile = toDTO(line);
-                profile.setPassword(str[4]);
-                return profile;
-            }).findFirst().orElse(null);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+
+        try (Session session = factory.openSession()) {
+            Query query = session.createQuery("From Profile where login =:login ");
+            query.setParameter("login", login);
+            List<Profile> list = query.getResultList();
+
+            if (list.isEmpty()) return null;
+            return list.getFirst();
         }
     }
 
     public int create(Profile profile) {
-        PrintWriter printWriter = null;
-        try {
-            profile.setId(profId++);
-            printWriter = new PrintWriter(new FileWriter("profile.txt", true));
-            printWriter.println(profile.toWrite());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            if (printWriter != null) {
-                printWriter.flush();
-                printWriter.close();
-            }
-        }
-        return 1;
 
+        Session session = factory.openSession();
+        Transaction t = session.beginTransaction();
+        session.save(profile);
+
+        t.commit();
+
+        return 1;
     }
 
     public List<Profile> getAll(ProfileRole... roles) {  // ProfileRole[] roles   ADMIN,STAFF    STUDENT
