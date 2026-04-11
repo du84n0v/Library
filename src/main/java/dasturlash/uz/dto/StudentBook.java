@@ -1,105 +1,105 @@
 package dasturlash.uz.dto;
 
 import dasturlash.uz.enums.StudentBookStatus;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+@Getter
+@Setter
+@NoArgsConstructor
+
+@Entity
+@Table(name = "student_book")
 public class StudentBook implements Comparable<StudentBook> {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    private Integer studentId;
-    private Integer bookId;
+
+//    @Column
+//    private Integer studentId;
+//
+//    @Column
+//    private Integer bookId;
+
+    @ManyToOne
+    @JoinColumn(name = "book_id")
     private Book book;
+
+    @ManyToOne
+    @JoinColumn(name = "student_id")
     private Profile student;
+
+    @Column(name = "created_date")
     private LocalDateTime createdDate;
+
+    @Column(name = "deadline_date")
     private LocalDate deadlineDate;
+
+    @Column(name = "returned_date")
     private LocalDateTime returnedDate;
+
+    @Enumerated(EnumType.STRING)
     private StudentBookStatus status;
+
+    @Column(name = "taken_count")
     private Integer takenCount = 0;
 
     public String toWrite() {
-        return id + "#" + studentId + "#" + bookId + "#" + createdDate + "#" + deadlineDate + "#" + status + "#" + returnedDate;
-    }
-
-    public Integer getId() {
-        return id;
+        return id + "#" + student.getId() + "#" + book.getId() + "#" + createdDate + "#" + deadlineDate + "#" + status + "#" + returnedDate;
     }
 
     public void setId(Integer id) {
         this.id = id;
     }
 
-    public Integer getStudentId() {
-        return studentId;
-    }
+//    public Integer getStudentId() {
+//        return studentId;
+//    }
+//
+//    public void setStudentId(Integer studentId) {
+//        this.studentId = studentId;
+//    }
+//
+//    public Integer getBookId() {
+//        return bookId;
+//    }
+//
+//    public void setBookId(Integer bookId) {
+//        this.bookId = bookId;
+//    }
 
-    public void setStudentId(Integer studentId) {
-        this.studentId = studentId;
-    }
-
-    public Integer getBookId() {
-        return bookId;
-    }
-
-    public void setBookId(Integer bookId) {
-        this.bookId = bookId;
-    }
-
-    public LocalDateTime getCreatedDate() {
-        return createdDate;
-    }
-
-    public void setCreatedDate(LocalDateTime createdDate) {
-        this.createdDate = createdDate;
-    }
-
-    public LocalDateTime getReturnedDate() {
-        return returnedDate;
-    }
-
-    public void setReturnedDate(LocalDateTime returnedDate) {
-        this.returnedDate = returnedDate;
-    }
-
-    public StudentBookStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(StudentBookStatus status) {
-        this.status = status;
-    }
-
-    public Book getBook() {
-        return book;
-    }
-
-    public void setBook(Book book) {
-        this.book = book;
-    }
-
-    public LocalDate getDeadlineDate() {
-        return deadlineDate;
-    }
-
-    public void setDeadlineDate(LocalDate deadlineDate) {
-        this.deadlineDate = deadlineDate;
-    }
-
-    public Profile getStudent() {
-        return student;
-    }
-
-    public void setStudent(Profile student) {
-        this.student = student;
-    }
-
-    public Integer getTakenCount() {
-        return takenCount;
-    }
-
-    public void setTakenCount(Integer takenCount) {
-        this.takenCount = takenCount;
-    }
+//    public void setCreatedDate(LocalDateTime createdDate) {
+//        this.createdDate = createdDate;
+//    }
+//
+//    public void setReturnedDate(LocalDateTime returnedDate) {
+//        this.returnedDate = returnedDate;
+//    }
+//
+//    public void setStatus(StudentBookStatus status) {
+//        this.status = status;
+//    }
+//
+//    public void setBook(Book book) {
+//        this.book = book;
+//    }
+//
+//    public void setDeadlineDate(LocalDate deadlineDate) {
+//        this.deadlineDate = deadlineDate;
+//    }
+//
+//    public void setStudent(Profile student) {
+//        this.student = student;
+//    }
+//
+//    public void setTakenCount(Integer takenCount) {
+//        this.takenCount = takenCount;
+//    }
 
     @Override
     public int compareTo(StudentBook o) {

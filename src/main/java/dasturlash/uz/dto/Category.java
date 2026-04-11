@@ -1,47 +1,33 @@
 package dasturlash.uz.dto;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
+@Getter
+@Setter
+@NoArgsConstructor
+
+@Entity
 public class Category {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    @Column
     private String name;
+
+    @Column
     private LocalDateTime createdDate;
+
+    @Column
     private boolean visible;
 
     public String toWrite(){
         return id+"#"+name+"#"+createdDate+"#"+visible;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public LocalDateTime getCreatedDate() {
-        return createdDate;
-    }
-
-    public void setCreatedDate(LocalDateTime createdDate) {
-        this.createdDate = createdDate;
-    }
-
-    public boolean isVisible() {
-        return visible;
-    }
-
-    public void setVisible(boolean visible) {
-        this.visible = visible;
     }
 
 

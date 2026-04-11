@@ -80,8 +80,8 @@ public class StudentBookRepository {
                 String[] str = line.split("#");
                 StudentBook studentBook = new StudentBook();
                 studentBook.setId(Integer.valueOf(str[0]));
-                studentBook.setStudentId(Integer.valueOf(str[1]));
-                studentBook.setBookId(Integer.valueOf(str[2]));
+                studentBook.getStudent().setId(Integer.valueOf(str[1]));
+                studentBook.getBook().setId(Integer.valueOf(str[2]));
                 studentBook.setCreatedDate(LocalDateTime.parse(str[3]));
                 studentBook.setDeadlineDate(LocalDate.parse(str[4]));
                 studentBook.setStatus(StudentBookStatus.valueOf(str[5]));
@@ -101,8 +101,8 @@ public class StudentBookRepository {
                 String[] str = line.split("#");
                 StudentBook studentBook = new StudentBook();
                 studentBook.setId(Integer.valueOf(str[0]));
-                studentBook.setStudentId(Integer.valueOf(str[1]));
-                studentBook.setBookId(Integer.valueOf(str[2]));
+                studentBook.getStudent().setId(Integer.valueOf(str[1]));
+                studentBook.getBook().setId(Integer.valueOf(str[2]));
                 studentBook.setCreatedDate(LocalDateTime.parse(str[3]));
                 studentBook.setDeadlineDate(LocalDate.parse(str[4]));
                 studentBook.setStatus(StudentBookStatus.valueOf(str[5]));
@@ -113,7 +113,7 @@ public class StudentBookRepository {
             throw new RuntimeException(e);
         }
         for (StudentBook studentBook : list) {
-            if (studentBook.getStudentId().equals(sbId)
+            if (studentBook.getStudent().getId().equals(sbId)
                     && studentBook.getStatus().equals(StudentBookStatus.TAKEN)) {
                 studentBook.setStatus(StudentBookStatus.RETURNED);
                 studentBook.setReturnedDate(LocalDateTime.now());
@@ -132,8 +132,8 @@ public class StudentBookRepository {
                 String[] str = line.split("#");
                 StudentBook studentBook = new StudentBook();
                 studentBook.setId(Integer.valueOf(str[0]));
-                studentBook.setStudentId(Integer.valueOf(str[1]));
-                studentBook.setBookId(Integer.valueOf(str[2]));
+                studentBook.getStudent().setId(Integer.valueOf(str[1]));
+                studentBook.getBook().setId(Integer.valueOf(str[2]));
                 studentBook.setCreatedDate(LocalDateTime.parse(str[3]));
                 studentBook.setDeadlineDate(LocalDate.parse(str[4]));
                 studentBook.setStatus(StudentBookStatus.valueOf(str[5]));
@@ -145,8 +145,8 @@ public class StudentBookRepository {
         }
 
         for (StudentBook studentBook : list) {
-            if (studentBook.getStudentId().equals(sId)
-                    && studentBook.getBookId().equals(bId)
+            if (studentBook.getStudent().getId().equals(sId)
+                    && studentBook.getBook().getId().equals(bId)
                     && studentBook.getStatus().equals(StudentBookStatus.TAKEN)) {
                 studentBook.setStatus(StudentBookStatus.RETURNED);
                 studentBook.setReturnedDate(LocalDateTime.now());

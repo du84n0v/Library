@@ -37,8 +37,8 @@ public class StudentBookService {
             return;
         }
         StudentBook studentBook = new StudentBook();
-        studentBook.setBookId(bId);
-        studentBook.setStudentId(profileId);
+        studentBook.getBook().setId(bId);
+        studentBook.getStudent().setId(profileId);
         studentBook.setCreatedDate(LocalDateTime.now());
         studentBook.setStatus(StudentBookStatus.TAKEN);
 

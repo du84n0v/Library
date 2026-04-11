@@ -67,7 +67,7 @@ public class BookRepository {
             }).map(line -> {
                 String[] str = line.split("#");
                 Book book = toDTO(line);
-                book.setCategoryId(Integer.valueOf(str[6]));
+                book.getCategory().setId(Integer.valueOf(str[6]));
                 return book;
             }).toList();
         } catch (IOException e) {
@@ -83,7 +83,7 @@ public class BookRepository {
             list = stream.map(line -> {
                 String[] str = line.split("#");
                 Book book = toDTO(line);
-                book.setCategoryId(Integer.valueOf(str[6]));
+                book.getCategory().setId(Integer.valueOf(str[6]));
                 book.setVisible(Boolean.valueOf(str[7]));
                 return book;
             }).toList();
@@ -112,7 +112,7 @@ public class BookRepository {
             }).map(line -> {
                 String[] str = line.split("#");
                 Book book = toDTO(line);
-                book.setCategoryId(Integer.valueOf(str[6]));
+                book.getCategory().setId(Integer.valueOf(str[6]));
                 return book;
             }).findAny().orElse(null);
 

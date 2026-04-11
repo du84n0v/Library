@@ -28,7 +28,7 @@ public class BookService {
             return;
         }
         // category
-        Category category = categoryRepository.getById(book.getCategoryId());
+        Category category = categoryRepository.getById(book.getCategory().getId());
         if (category == null) {
             System.out.println("Category not found.");
             return;

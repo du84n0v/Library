@@ -2,18 +2,45 @@ package dasturlash.uz.dto;
 
 import dasturlash.uz.enums.ProfileRole;
 import dasturlash.uz.enums.ProfileStatus;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
+@Getter
+@Setter
+@NoArgsConstructor
+
+@Entity
 public class Profile implements Comparable<Profile> {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    @Column
     private String name;
+
+    @Column
     private String surname;
+
+    @Column
     private String login;
+
+    @Column
     private String password;
+
+    @Column
     private String phone;
+
+    @Enumerated(EnumType.STRING)
     private ProfileStatus status;
+
+    @Enumerated(EnumType.STRING)
     private ProfileRole role;
+
+    @Column
     private LocalDateTime createdDate;
 
     public String toWrite() {
@@ -26,78 +53,6 @@ public class Profile implements Comparable<Profile> {
 
     public String getStudentDetailAsString() {
         return id + " " + name + " " + surname + " " + login + " " + phone + " " + status + " " + createdDate;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getSurname() {
-        return surname;
-    }
-
-    public void setSurname(String surname) {
-        this.surname = surname;
-    }
-
-    public String getLogin() {
-        return login;
-    }
-
-    public void setLogin(String login) {
-        this.login = login;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public ProfileStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(ProfileStatus status) {
-        this.status = status;
-    }
-
-    public ProfileRole getRole() {
-        return role;
-    }
-
-    public void setRole(ProfileRole role) {
-        this.role = role;
-    }
-
-    public LocalDateTime getCreatedDate() {
-        return createdDate;
-    }
-
-    public void setCreatedDate(LocalDateTime createdDate) {
-        this.createdDate = createdDate;
     }
 
     @Override

@@ -87,7 +87,7 @@ public class BookController {
         Book book = new Book();
         book.setTitle(title);
         book.setAuthor(author);
-        book.setCategoryId(categoryId);
+        book.getCategory().setId(categoryId);
         book.setPublishDate(LocalDate.parse(publishDate));
         book.setAvailableDay(availableDay);
 

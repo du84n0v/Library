@@ -1,95 +1,56 @@
 package dasturlash.uz.dto;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+@Getter
+@Setter
+@NoArgsConstructor
+
+@Entity
 public class Book implements Comparable<Book>{
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    @Column
     private String title;
+
+    @Column
     private String author;
-    private Integer categoryId;
+
+    @Column(name = "published_date")
     private LocalDate publishDate;
+
+    @Column
     private Integer availableDay;
+
+    @Column
     private Boolean visible;
+
+    @Column(name = "created_date")
     private LocalDateTime createdDate;
 
-    public Category category;
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
 
     public String toWrite() {
-        return id + "#" + title + "#" + author + "#" + publishDate + "#" + availableDay + "#" + createdDate + "#" +categoryId+"#"+ visible;
+        return id + "#" + title + "#" + author + "#" + publishDate + "#" + availableDay + "#" + createdDate +"#"+ visible;
     }
 
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getAuthor() {
-        return author;
-    }
-
-    public void setAuthor(String author) {
-        this.author = author;
-    }
-
-    public Integer getCategoryId() {
-        return categoryId;
-    }
-
-    public void setCategoryId(Integer categoryId) {
-        this.categoryId = categoryId;
-    }
-
-    public LocalDate getPublishDate() {
-        return publishDate;
-    }
-
-    public void setPublishDate(LocalDate publishDate) {
-        this.publishDate = publishDate;
-    }
-
-    public Integer getAvailableDay() {
-        return availableDay;
-    }
-
-    public void setAvailableDay(Integer availableDay) {
-        this.availableDay = availableDay;
-    }
-
-    public Boolean getVisible() {
-        return visible;
-    }
-
-    public void setVisible(Boolean visible) {
-        this.visible = visible;
-    }
-
-    public LocalDateTime getCreatedDate() {
-        return createdDate;
-    }
-
-    public void setCreatedDate(LocalDateTime createdDate) {
-        this.createdDate = createdDate;
-    }
-
-    public Category getCategory() {
-        return category;
-    }
-
-    public void setCategory(Category category) {
-        this.category = category;
-    }
+    //    public Integer getCategoryId() {
+//        return categoryId;
+//    }
+//
+//    public void setCategoryId(Integer categoryId) {
+//        this.categoryId = categoryId;
+//    }
 
 
     @Override
