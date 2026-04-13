@@ -5,9 +5,11 @@ import dasturlash.uz.dto.Profile;
 import dasturlash.uz.enums.ProfileRole;
 import dasturlash.uz.service.ProfileService;
 import dasturlash.uz.util.ScannerUtil;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
+@Setter
 @Controller
 public class ProfileController {
 
@@ -99,7 +101,4 @@ public class ProfileController {
         profileService.changeStatus(id);
     }
 
-    public void setProfileService(ProfileService profileService) {
-        this.profileService = profileService;
-    }
 }

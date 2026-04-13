@@ -1,7 +1,5 @@
 package dasturlash.uz.repository;
 
-import dasturlash.uz.dto.Book;
-import dasturlash.uz.dto.Category;
 import dasturlash.uz.dto.Profile;
 import dasturlash.uz.enums.ProfileRole;
 import dasturlash.uz.enums.ProfileStatus;
@@ -12,17 +10,9 @@ import org.hibernate.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.sql.*;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Stream;
 
 
 @Repository
@@ -54,7 +44,7 @@ public class ProfileRepository {
 
             } catch (Exception e) {
                 t.rollback();
-                e.getMessage();
+                System.out.println(e.getMessage());
                 return 0;
             }
         }
@@ -74,18 +64,24 @@ public class ProfileRepository {
 
     public List<Profile> search(String query, ProfileRole... roles) {
         List<ProfileRole> rolee = List.of(roles);
-        try {
-            Stream<String> stream = Files.lines(Paths.get("profile.txt"));
-            return stream.filter(line -> {
-                String[] str = line.split("#");
-                return rolee.contains(ProfileRole.valueOf(str[7]))
-                        && str[1].toLowerCase().contains(query.toLowerCase())
-                        || str[2].toLowerCase().contains(query.toLowerCase())
-                        || str[3].toLowerCase().contains(query.toLowerCase())
-                        || str[5].toLowerCase().contains(query.toLowerCase());
-            }).map(this::toDTO).toList();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        query = query.trim().toLowerCase();
+
+        try(Session session = factory.openSession()){
+            Query<Profile> answer = session.createQuery("FROM Profile", Profile.class);
+            List<Profile> cur = answer.getResultList();
+            List<Profile> result = new LinkedList<>();
+
+            for(Profile p :cur){
+                if(rolee.contains(p.getRole()) && (
+                        p.getName().toLowerCase().contains(query) ||
+                        p.getSurname().toLowerCase().contains(query) ||
+                        p.getLogin().contains(query) ||
+                        p.getPhone().contains(query))){
+                    result.add(p);
+                }
+            }
+
+            return result;
         }
     }
 
@@ -101,22 +97,6 @@ public class ProfileRepository {
     }
 
     public int updateStatus(Integer id, ProfileStatus status) {
-
-        /*
-        Session session = factory.openSession();
-        Transaction t = session.beginTransaction();
-
-        Student entity = session.get(Student.class, id);
-        entity.setName(student.getName());
-        entity.setSurname(student.getSurname());
-        entity.setAge(student.getAge());
-
-        session.save(entity);
-        t.commit();
-
-        session.close();
-        factory.close();
-         */
 
         try(Session session = factory.openSession()){
             Transaction tt = session.beginTransaction();
@@ -138,80 +118,14 @@ public class ProfileRepository {
             }
         }
 
-//        List<Profile> list = new ArrayList<>();
-//        try {
-//            Stream<String> stream = Files.lines(Paths.get("profile.txt"));
-//            list = stream.map(line -> {
-//                String[] str = line.split("#");
-//                Profile profile = toDTO(line);
-//                profile.setPassword(str[4]);
-//                return profile;
-//            }).toList();
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-//
-//
-//        for (Profile profile : list) {
-//            if (profile.getId().equals(id)) {
-//                profile.setStatus(status);
-//                rewrite(list);
-//                return 1;
-//            }
-//        }
-//        return 0;
-
-    }
-
-    private void rewrite(List<Profile> list) {
-        PrintWriter printWriter = null;
-        try {
-            printWriter = new PrintWriter(new FileWriter("profile.txt"));
-            for (Profile profile : list) {
-                printWriter.println(profile.toWrite());
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            if (printWriter != null) {
-                printWriter.flush();
-                printWriter.close();
-            }
-        }
-    }
-
-    private Profile toDTO(String line) {
-        String[] str = line.split("#");
-        Profile profile = new Profile();
-        profile.setId(Integer.valueOf(str[0]));
-        profile.setName(str[1]);
-        profile.setSurname(str[2]);
-        profile.setLogin(str[3]);
-        profile.setPhone(str[5]);
-        profile.setStatus(ProfileStatus.valueOf(str[6]));
-        profile.setRole(ProfileRole.valueOf(str[7]));
-        profile.setCreatedDate(LocalDateTime.parse(str[8]));
-        return profile;
     }
 
     public Profile get(Integer id) {
-        try {
-            Stream<String> stream = Files.lines(Paths.get("profile.txt"));
-            return stream.filter(line -> {
-                String[] str = line.split("#");
-                return Integer.valueOf(str[0]).equals(id);
-            }).map(line -> {
-                String[] str = line.split("#");
-                Profile profile = new Profile();
-                profile.setId(Integer.valueOf(str[0]));
-                profile.setName(str[1]);
-                profile.setSurname(str[2]);
-                profile.setPhone(str[5]);
-                return profile;
-            }).findAny().orElse(null);
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        try(Session session = factory.openSession()) {
+            Query<Profile> query = session.createQuery("FROM Profile where id =: id", Profile.class);
+            query.setParameter("id", id);
+            List<Profile> result = query.getResultList();
+            return (result.isEmpty() ? null : result.getFirst());
         }
     }
 }
