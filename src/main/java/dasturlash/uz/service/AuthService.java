@@ -74,6 +74,9 @@ public class AuthService {
         if (effectedRow == 1) {
             System.out.println("Registration completed.");
         }
+        else {
+            System.out.println("Hmm, Something is getting wrong");
+        }
     }
 
 }

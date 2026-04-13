@@ -5,13 +5,13 @@ import dasturlash.uz.dto.Category;
 import dasturlash.uz.dto.Profile;
 import dasturlash.uz.enums.ProfileRole;
 import dasturlash.uz.enums.ProfileStatus;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.Query;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -34,7 +34,7 @@ public class ProfileRepository {
     public Profile getByLogin(String login) {
 
         try (Session session = factory.openSession()) {
-            Query query = session.createQuery("From Profile where login =:login ");
+            Query<Profile> query = session.createQuery("From Profile where login =:login", Profile.class);
             query.setParameter("login", login);
             List<Profile> list = query.getResultList();
 
@@ -45,25 +45,28 @@ public class ProfileRepository {
 
     public int create(Profile profile) {
 
-        Session session = factory.openSession();
-        Transaction t = session.beginTransaction();
-        session.save(profile);
+        try (Session session = factory.openSession()) {
+            Transaction t = session.beginTransaction();
+            try {
+                session.save(profile);
+                t.commit();
+                return 1;
 
-        t.commit();
-
-        return 1;
+            } catch (Exception e) {
+                t.rollback();
+                e.getMessage();
+                return 0;
+            }
+        }
     }
 
     public List<Profile> getAll(ProfileRole... roles) {  // ProfileRole[] roles   ADMIN,STAFF    STUDENT
         List<ProfileRole> rolee = List.of(roles);
-        try {
-            Stream<String> stream = Files.lines(Paths.get("profile.txt"));
-            return stream.filter(line -> {
-                String[] str = line.split("#");
-                return rolee.contains(ProfileRole.valueOf(str[7]));
-            }).map(this::toDTO).sorted().toList();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+
+        try(Session session = factory.openSession()){
+            Query<Profile> query = session.createQuery("from Profile where role in (:roles)", Profile.class);
+            query.setParameter("roles", rolee);
+             return query.getResultList();
         }
 
     }
@@ -87,41 +90,76 @@ public class ProfileRepository {
     }
 
     public Profile getById(Integer id) {
-        try {
-            Stream<String> stream = Files.lines(Paths.get("profile.txt"));
-            return stream.filter(line -> {
-                String[] str = line.split("#");
-                return Integer.valueOf(str[0]).equals(id);
-            }).map(this::toDTO).findFirst().orElse(null);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+
+        try(Session session = factory.openSession()){
+            Query<Profile> query = session.createQuery("from Profile where id =: id", Profile.class);
+            query.setParameter("id", id);
+            List<Profile> result = query.getResultList();
+            return (result.isEmpty() ? null : result.getFirst());
         }
 
     }
 
     public int updateStatus(Integer id, ProfileStatus status) {
-        List<Profile> list = new ArrayList<>();
-        try {
-            Stream<String> stream = Files.lines(Paths.get("profile.txt"));
-            list = stream.map(line -> {
-                String[] str = line.split("#");
-                Profile profile = toDTO(line);
-                profile.setPassword(str[4]);
-                return profile;
-            }).toList();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
 
+        /*
+        Session session = factory.openSession();
+        Transaction t = session.beginTransaction();
 
-        for (Profile profile : list) {
-            if (profile.getId().equals(id)) {
-                profile.setStatus(status);
-                rewrite(list);
-                return 1;
+        Student entity = session.get(Student.class, id);
+        entity.setName(student.getName());
+        entity.setSurname(student.getSurname());
+        entity.setAge(student.getAge());
+
+        session.save(entity);
+        t.commit();
+
+        session.close();
+        factory.close();
+         */
+
+        try(Session session = factory.openSession()){
+            Transaction tt = session.beginTransaction();
+            try{
+                Query query = session.createQuery(
+                        "UPDATE Profile SET status =:status WHERE id =:id"
+                );
+                query.setParameter("id", id);
+                query.setParameter("status", status);
+
+                int upd = query.executeUpdate();
+                tt.commit();
+                return upd;
+            }
+            catch (Exception e){
+                tt.rollback();
+                e.getMessage();
+                return 0;
             }
         }
-        return 0;
+
+//        List<Profile> list = new ArrayList<>();
+//        try {
+//            Stream<String> stream = Files.lines(Paths.get("profile.txt"));
+//            list = stream.map(line -> {
+//                String[] str = line.split("#");
+//                Profile profile = toDTO(line);
+//                profile.setPassword(str[4]);
+//                return profile;
+//            }).toList();
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
+//
+//
+//        for (Profile profile : list) {
+//            if (profile.getId().equals(id)) {
+//                profile.setStatus(status);
+//                rewrite(list);
+//                return 1;
+//            }
+//        }
+//        return 0;
 
     }
 

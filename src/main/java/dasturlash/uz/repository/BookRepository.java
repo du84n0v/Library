@@ -1,8 +1,6 @@
 package dasturlash.uz.repository;
 
-//import dasturlash.uz.container.ComponentContainer;
 import dasturlash.uz.dto.Book;
-import dasturlash.uz.dto.Category;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 

@@ -24,13 +24,13 @@ public class Main {
 //        MainController mainController = new MainController();
 //        mainController.start();
 
-//        StandardServiceRegistry ssr = new StandardServiceRegistryBuilder().configure("hibernate-config.xml").build();
-//        Metadata meta = new MetadataSources(ssr).getMetadataBuilder().build();
-//
-//        SessionFactory factory = meta.getSessionFactoryBuilder().build();
-//
-//
-//        factory.close();
+        StandardServiceRegistry ssr = new StandardServiceRegistryBuilder().configure("hibernate-config.xml").build();
+        Metadata meta = new MetadataSources(ssr).getMetadataBuilder().build();
+
+        SessionFactory factory = meta.getSessionFactoryBuilder().build();
+
+
+        factory.close();
 
         ApplicationContext context = new AnnotationConfigApplicationContext(SpringConfig.class);
 
