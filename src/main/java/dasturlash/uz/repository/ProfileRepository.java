@@ -106,10 +106,9 @@ public class ProfileRepository {
                 );
                 query.setParameter("id", id);
                 query.setParameter("status", status);
-
-                int upd = query.executeUpdate();
+                int result = query.executeUpdate();
                 tt.commit();
-                return upd;
+                return result;
             }
             catch (Exception e){
                 tt.rollback();

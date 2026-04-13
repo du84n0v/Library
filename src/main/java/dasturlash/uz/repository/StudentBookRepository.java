@@ -1,9 +1,5 @@
 package dasturlash.uz.repository;
 
-//import dasturlash.uz.container.ComponentContainer;
-import dasturlash.uz.dto.Book;
-import dasturlash.uz.dto.Category;
-import dasturlash.uz.dto.Profile;
 import dasturlash.uz.dto.StudentBook;
 import dasturlash.uz.enums.StudentBookStatus;
 import org.springframework.beans.factory.annotation.Autowired;

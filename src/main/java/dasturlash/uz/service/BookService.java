@@ -22,7 +22,7 @@ public class BookService {
     private BookRepository bookRepository;
 
     public void add(Book book) {
-        categoryService.list();
+//        categoryService.list();
         // check
         if (!isValid(book)) {
             return;
@@ -63,13 +63,16 @@ public class BookService {
 
     public void all() {
         List<Book> bookList = bookRepository.getAll();
+        if(bookList.isEmpty()){
+            return;
+        }
         System.out.printf("-------------------------------------------------------------------%n");
         System.out.printf("                               Book list                        %n");
         System.out.printf("-------------------------------------------------------------------%n");
-        System.out.printf("| %-4s | %-20s | %-15s | %-15s |%n", "Id", "Title", "Author", "Category name");
+        System.out.printf("| %-4s | %-30s | %-20s | %-20s |%n", "Id", "Title", "Author", "Category name");
         System.out.printf("-------------------------------------------------------------------%n");
         bookList.forEach(book -> {
-            System.out.printf("| %-4d | %-20s | %-15s | %-15s |%n", book.getId(), book.getTitle(), book.getAuthor(), book.getCategory().getName());
+            System.out.printf("| %-4d | %-30s | %-20s | %-20s |%n", book.getId(), book.getTitle(), book.getAuthor(), book.getCategory().getName());
         });
         System.out.printf("-------------------------------------------------------------------%n");
     }

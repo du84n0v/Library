@@ -2,6 +2,11 @@ package dasturlash.uz.repository;
 
 import dasturlash.uz.dto.Book;
 import dasturlash.uz.dto.Category;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.query.Query;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.io.FileWriter;
@@ -18,126 +23,68 @@ import java.util.stream.Stream;
 
 @Repository
 public class CategoryRepository {
+
+    @Autowired
+    SessionFactory factory;
+
     private Integer catId = 1;
 
     public Category getByName(String name) {
-        try {
-            Stream<String> stream = Files.lines(Paths.get("category.txt"));
-            return stream.filter(line -> {
-                String[] str = line.split("#");
-                return str[1].equals(name);
-            }).map(this::toDTO).findFirst().orElse(null);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        try(Session session = factory.openSession()){
+            Query<Category> query = session.createQuery("FROM Category WHERE name =: name", Category.class);
+            query.setParameter("name", name);
+            List<Category> categories = query.getResultList();
+            return (categories.isEmpty() ? null : categories.getFirst());
         }
     }
 
     public int save(Category category) {
-        PrintWriter printWriter = null;
-        try {
-            category.setId(catId++);
-            printWriter = new PrintWriter(new FileWriter("category.txt", true));
-            printWriter.println(category.toWrite());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            if (printWriter != null) {
-                printWriter.flush();
-                printWriter.close();
+        try(Session session = factory.openSession()){
+            Transaction tt = session.beginTransaction();
+            try {
+                session.save(category);
+                tt.commit();
+                return 1;
+            }
+            catch (Exception e){
+                tt.rollback();
+                System.out.println(e.getMessage());
+                return 0;
             }
         }
-        return 1;
     }
 
     public List<Category> getAll() { //
-        try {
-            Stream<String> stream = Files.lines(Paths.get("category.txt"));
-            return stream.filter(line -> {
-                String[] str = line.split("#");
-                return Boolean.parseBoolean(str[3]);
-            }).map(this::toDTO).toList();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        try(Session session = factory.openSession()){
+            Query<Category> query = session.createQuery("FROM Category ", Category.class);
+            return query.getResultList();
         }
     }
 
     public int deleteById(Integer id) {
-        List<Category> list = new ArrayList<>();
-        try {
-            Stream<String> stream = Files.lines(Paths.get("category.txt"));
-            list = stream.map(this::toDTO).toList();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        for (Category category : list) {
-            if (category.getId().equals(id)) {
-                category.setVisible(false);
-                rewrite(list);
-                return 1;
+        try(Session session = factory.openSession()){
+            Transaction tt = session.beginTransaction();
+            try {
+                Query query = session.createQuery("UPDATE Category SET visible = false WHERE id =: id");
+                query.setParameter("id", id);
+                int result = query.executeUpdate();
+                tt.commit();
+                return result;
+            }
+            catch (Exception e){
+                tt.rollback();
+                System.out.println(e.getMessage());
+                return 0;
             }
         }
-        return 0;
-
     }
-
 
     public Category getById(Integer id) {
-        try {
-            Stream<String> stream = Files.lines(Paths.get("category.txt"));
-            return stream.filter(line -> {
-                String[] str = line.split("#");
-                return Integer.valueOf(str[0]).equals(id);
-            }).map(this::toDTO).findFirst().orElse(null);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        try(Session session = factory.openSession()){
+            Query<Category> query = session.createQuery("FROM Category WHERE id =:id", Category.class);
+            query.setParameter("id", id);
+            List<Category> result = query.getResultList();
+            return (result.isEmpty() ? null : result.getFirst());
         }
     }
-
-    private void rewrite(List<Category> list) {
-        PrintWriter printWriter = null;
-        try {
-            printWriter = new PrintWriter(new FileWriter("category.txt"));
-            for (Category category : list) {
-                printWriter.println(category.toWrite());
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            if (printWriter != null) {
-                printWriter.flush();
-                printWriter.close();
-            }
-        }
-    }
-
-    private Category toDTO(String line) {
-        String[] str = line.split("#");
-        Category category = new Category();
-        category.setId(Integer.valueOf(str[0]));
-        category.setName(str[1]);
-        category.setCreatedDate(LocalDateTime.parse(str[2]));
-        category.setVisible(Boolean.parseBoolean(str[3]));
-        return category;
-    }
-
-    public Category get(Integer id) {
-        try {
-            Stream<String> stream = Files.lines(Paths.get("category.txt"));
-            return stream.filter(line -> {
-                String[] str = line.split("#");
-                return Integer.valueOf(str[0]).equals(id) && Boolean.parseBoolean(str[3]);
-            }).map(line -> {
-                String[] str = line.split("#");
-                Category category = new Category();
-                category.setId(Integer.valueOf(str[0]));
-                category.setName(str[1]);
-                return category;
-            }).findAny().orElse(null);
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
 }

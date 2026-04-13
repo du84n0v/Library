@@ -2,6 +2,7 @@ package dasturlash.uz.controller;
 
 import dasturlash.uz.container.ComponentContainer;
 import dasturlash.uz.dto.Book;
+import dasturlash.uz.dto.Category;
 import dasturlash.uz.dto.StudentBook;
 import dasturlash.uz.service.BookService;
 import dasturlash.uz.service.StudentBookService;
@@ -69,25 +70,31 @@ public class BookController {
 
 
     public void add() {
+        ComponentContainer.scannerText.nextLine();
         System.out.print("Enter title: ");
-        String title = ComponentContainer.scannerText.next();
+        String title = ComponentContainer.scannerText.nextLine();
 
         System.out.print("Enter author: ");
-        String author = ComponentContainer.scannerText.next();
+        String author = ComponentContainer.scannerText.nextLine();
 
         System.out.print("Enter category id: ");
         Integer categoryId = ComponentContainer.scannerNumber.nextInt();
+        ComponentContainer.scannerNumber.nextLine();
 
         System.out.print("Enter available day: ");
         Integer availableDay = ComponentContainer.scannerNumber.nextInt();
+        ComponentContainer.scannerNumber.nextLine();
 
-        System.out.print("Enter publishDate (yyyy-MM-dd): "); // 2023-07-15
-        String publishDate = ComponentContainer.scannerText.next();
+        System.out.print("Enter publishDate (yyyy-MM-dd): ");
+        String publishDate = ComponentContainer.scannerText.nextLine();
+
+        Category category = new Category();
+        category.setId(categoryId);
 
         Book book = new Book();
         book.setTitle(title);
         book.setAuthor(author);
-        book.getCategory().setId(categoryId);
+        book.setCategory(category);
         book.setPublishDate(LocalDate.parse(publishDate));
         book.setAvailableDay(availableDay);
 

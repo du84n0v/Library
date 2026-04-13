@@ -40,19 +40,6 @@ public class Book implements Comparable<Book>{
     @JoinColumn(name = "category_id")
     private Category category;
 
-    public String toWrite() {
-        return id + "#" + title + "#" + author + "#" + publishDate + "#" + availableDay + "#" + createdDate +"#"+ visible;
-    }
-
-    //    public Integer getCategoryId() {
-//        return categoryId;
-//    }
-//
-//    public void setCategoryId(Integer categoryId) {
-//        this.categoryId = categoryId;
-//    }
-
-
     @Override
     public int compareTo(Book o) {
         return this.id-o.id;
