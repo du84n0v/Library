@@ -36,6 +36,7 @@ public class StudentBookService {
             System.out.println("You can take only 5 books");
             return;
         }
+        bookRepository.increaseBookTakenCount(book.getId());
         StudentBook studentBook = new StudentBook();
         studentBook.setBook(book);
         studentBook.setStudent(ComponentContainer.currentProfile);

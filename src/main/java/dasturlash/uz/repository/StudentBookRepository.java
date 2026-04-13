@@ -2,6 +2,8 @@ package dasturlash.uz.repository;
 
 import dasturlash.uz.dto.StudentBook;
 import dasturlash.uz.enums.StudentBookStatus;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -9,12 +11,11 @@ import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.*;
+
+@Setter
+@Getter
 
 @Repository
 public class StudentBookRepository {
@@ -141,30 +142,5 @@ public class StudentBookRepository {
 //                    "SELECT ", StudentBook.class)
 //        }
         return new LinkedList<>();
-    }
-
-    private void rewrite(List<StudentBook> list) {
-        PrintWriter printWriter = null;
-        try {
-            printWriter = new PrintWriter(new FileWriter("student_book.txt"));
-            for (StudentBook studentBook : list) {
-                printWriter.println(studentBook.toWrite());
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            if (printWriter != null) {
-                printWriter.flush();
-                printWriter.close();
-            }
-        }
-    }
-
-    public void setBookRepository(BookRepository bookRepository) {
-        this.bookRepository = bookRepository;
-    }
-
-    public void setProfileRepository(ProfileRepository profileRepository) {
-        this.profileRepository = profileRepository;
     }
 }

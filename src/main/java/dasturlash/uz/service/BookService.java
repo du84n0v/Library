@@ -109,7 +109,7 @@ public class BookService {
             return ;
         }
         sort(topBook);
-        for(int i = 1; i < Math.max(topBook.size(), 11); ++ i){
+        for(int i = 0; i < Math.min(topBook.size(), 10); ++ i){
             Book book = topBook.get(i);
             String str = String.format("%d, %d %s, %s, %s, %s", i+1, book.getId(), book.getTitle(),
                     book.getAuthor(), book.getCategory().getName(), book.getTakenCount());

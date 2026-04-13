@@ -110,4 +110,14 @@ public class BookRepository {
             return query.getResultList();
         }
     }
+
+    public void increaseBookTakenCount(Integer id) {
+        try(Session session = factory.openSession()){
+            Transaction tt = session.beginTransaction();
+            Query query = session.createQuery("UPDATE Book SET takenCount = takenCount + 1 WHERE id =: id");
+            query.setParameter("id", id);
+            query.executeUpdate();
+            tt.commit();
+        }
+    }
 }
