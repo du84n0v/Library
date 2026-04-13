@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static java.util.Collections.sort;
+
 @Service
 public class BookService {
 
@@ -100,15 +102,18 @@ public class BookService {
         });
     }
 
-    public void setCategoryService(CategoryService categoryService) {
-        this.categoryService = categoryService;
-    }
-
-    public void setCategoryRepository(CategoryRepository categoryRepository) {
-        this.categoryRepository = categoryRepository;
-    }
-
-    public void setBookRepository(BookRepository bookRepository) {
-        this.bookRepository = bookRepository;
+    public void bestBooks(){
+        List<Book> topBook = bookRepository.getBestBooks();
+        if(topBook.isEmpty()){
+            System.out.println("There are no book has been taken yet");
+            return ;
+        }
+        sort(topBook);
+        for(int i = 1; i < Math.max(topBook.size(), 11); ++ i){
+            Book book = topBook.get(i);
+            String str = String.format("%d, %d %s, %s, %s, %s", i+1, book.getId(), book.getTitle(),
+                    book.getAuthor(), book.getCategory().getName(), book.getTakenCount());
+            System.out.println(str);
+        }
     }
 }

@@ -36,12 +36,15 @@ public class Book implements Comparable<Book>{
     @Column(name = "created_date")
     private LocalDateTime createdDate;
 
+    @Column(name = "taken_count")
+    private Integer takenCount;
+
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
 
     @Override
     public int compareTo(Book o) {
-        return this.id-o.id;
+        return this.takenCount-o.takenCount;
     }
 }

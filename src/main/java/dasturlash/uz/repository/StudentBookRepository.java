@@ -2,19 +2,19 @@ package dasturlash.uz.repository;
 
 import dasturlash.uz.dto.StudentBook;
 import dasturlash.uz.enums.StudentBookStatus;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.sql.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Stream;
 
 @Repository
 public class StudentBookRepository {
@@ -23,205 +23,124 @@ public class StudentBookRepository {
     private BookRepository bookRepository;
     @Autowired
     private ProfileRepository profileRepository;
+    @Autowired
+    SessionFactory factory;
 
-    private Integer serialId = 1;
 
     public int save(StudentBook studentBook) {
-        PrintWriter printWriter = null;
-        try {
-            studentBook.setId(serialId++);
-            printWriter = new PrintWriter(new FileWriter("student_book.txt", true));
-            printWriter.println(studentBook.toWrite());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            if (printWriter != null) {
-                printWriter.flush();
-                printWriter.close();
+        try(Session session = factory.openSession()){
+            Transaction tt = session.beginTransaction();
+            try{
+                session.save(studentBook);
+                tt.commit();
+                return 1;
+            }
+            catch (Exception e){
+                tt.rollback();
+                System.out.println(e.getMessage());
+                return 0;
             }
         }
-        return 1;
     }
 
-    public List<StudentBook> studentBookOnHand(Integer sId, StudentBookStatus status) {
-        try {
-            Stream<String> stream = Files.lines(Paths.get("student_book.txt"));
-            return stream.filter(line -> {
-                String[] str = line.split("#");
-                return Integer.valueOf(str[1]).equals(sId)
-                        && str[5].equals(status.name());
-            }).map(line -> {
-                String[] str = line.split("#");
-                StudentBook studentBook = new StudentBook();
-                studentBook.setId(Integer.valueOf(str[0]));
-                studentBook.setCreatedDate(LocalDateTime.parse(str[3]));
-                if (str[6] != null) studentBook.setReturnedDate(LocalDateTime.parse(str[6]));
-                studentBook.setBook(bookRepository.get(Integer.valueOf(str[2])));
-                return studentBook;
-            }).sorted().toList();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+    public List<StudentBook> studentBookOnHand(Integer sId, StudentBookStatus... status) {
+        List<StudentBookStatus> list = List.of(status);
+        try(Session session = factory.openSession()){
+            Query<StudentBook> query = session.createQuery(
+                    "FROM StudentBook WHERE student.id =: s_id AND status in (:status)",
+                    StudentBook.class);
+            query.setParameter("s_id", sId);
+            query.setParameter("status", list);
+            return query.getResultList();
         }
     }
 
     public StudentBook getStudentBook(Integer sId, Integer bId) {
-        try {
-            Stream<String> stream = Files.lines(Paths.get("student_book.txt"));
-            return stream.filter(line -> {
-                String[] str = line.split("#");
-                return Integer.valueOf(str[1]).equals(sId)
-                        && Integer.valueOf(str[2]).equals(bId)
-                        && str[5].equals("TAKEN");
-            }).map(line -> {
-                String[] str = line.split("#");
-                StudentBook studentBook = new StudentBook();
-                studentBook.setId(Integer.valueOf(str[0]));
-                studentBook.getStudent().setId(Integer.valueOf(str[1]));
-                studentBook.getBook().setId(Integer.valueOf(str[2]));
-                studentBook.setCreatedDate(LocalDateTime.parse(str[3]));
-                studentBook.setDeadlineDate(LocalDate.parse(str[4]));
-                studentBook.setStatus(StudentBookStatus.valueOf(str[5]));
-                return studentBook;
-            }).findAny().orElse(null);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        try(Session session = factory.openSession()){
+            Query<StudentBook> query = session.createQuery(
+                    "FROM StudentBook WHERE student.id =: sid AND book.id =: bid",
+                    StudentBook.class);
+            query.setParameter("sid", sId);
+            query.setParameter("bid",bId);
 
+            List<StudentBook> result = query.getResultList();
+            return (result.isEmpty() ? null : result.getFirst());
+        }
     }
 
     public int returnBook(Integer sbId) {
-        List<StudentBook> list = new ArrayList<>();
-        try {
-            Stream<String> stream = Files.lines(Paths.get("student_book.txt"));
-            list = stream.map(line -> {
-                String[] str = line.split("#");
-                StudentBook studentBook = new StudentBook();
-                studentBook.setId(Integer.valueOf(str[0]));
-                studentBook.getStudent().setId(Integer.valueOf(str[1]));
-                studentBook.getBook().setId(Integer.valueOf(str[2]));
-                studentBook.setCreatedDate(LocalDateTime.parse(str[3]));
-                studentBook.setDeadlineDate(LocalDate.parse(str[4]));
-                studentBook.setStatus(StudentBookStatus.valueOf(str[5]));
-                if (str[6] != null) studentBook.setReturnedDate(LocalDateTime.parse(str[6]));
-                return studentBook;
-            }).toList();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        for (StudentBook studentBook : list) {
-            if (studentBook.getStudent().getId().equals(sbId)
-                    && studentBook.getStatus().equals(StudentBookStatus.TAKEN)) {
-                studentBook.setStatus(StudentBookStatus.RETURNED);
-                studentBook.setReturnedDate(LocalDateTime.now());
-                rewrite(list);
-                return 1;
+
+        try(Session session = factory.openSession()){
+            Transaction tt = session.beginTransaction();
+            try{
+                Query query = session.createQuery(
+                        "UPDATE StudentBook SET status =: status, returnedDate =: now WHERE id =: id");
+                query.setParameter("id", sbId);
+                query.setParameter("status", StudentBookStatus.RETURNED);
+                query.setParameter("now", LocalDateTime.now());
+                int upd = query.executeUpdate();
+                tt.commit();
+                return upd;
+            }
+            catch (Exception e){
+                tt.rollback();
+                System.out.println(e.getMessage());
+                return 0;
             }
         }
-        return 0;
     }
 
     public int returnBook(Integer sId, Integer bId) {
-        List<StudentBook> list = new ArrayList<>();
-        try {
-            Stream<String> stream = Files.lines(Paths.get("student_book.txt"));
-            list = stream.map(line -> {
-                String[] str = line.split("#");
-                StudentBook studentBook = new StudentBook();
-                studentBook.setId(Integer.valueOf(str[0]));
-                studentBook.getStudent().setId(Integer.valueOf(str[1]));
-                studentBook.getBook().setId(Integer.valueOf(str[2]));
-                studentBook.setCreatedDate(LocalDateTime.parse(str[3]));
-                studentBook.setDeadlineDate(LocalDate.parse(str[4]));
-                studentBook.setStatus(StudentBookStatus.valueOf(str[5]));
-                if (str[6] != null) studentBook.setReturnedDate(LocalDateTime.parse(str[6]));
-                return studentBook;
-            }).toList();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        try(Session session = factory.openSession()){
+            Transaction tt = session.beginTransaction();
+            try{
+                Query query = session.createQuery(
+                        "UPDATE StudentBook SET status =: new_status, returnedDate =: now WHERE student.id =: sid AND book.id =: bid AND status =: old_status");
+                query.setParameter("new_status", StudentBookStatus.RETURNED);
+                query.setParameter("now", LocalDateTime.now());
+                query.setParameter("sid", sId);
+                query.setParameter("bid", bId);
+                query.setParameter("old_status", StudentBookStatus.TAKEN);
 
-        for (StudentBook studentBook : list) {
-            if (studentBook.getStudent().getId().equals(sId)
-                    && studentBook.getBook().getId().equals(bId)
-                    && studentBook.getStatus().equals(StudentBookStatus.TAKEN)) {
-                studentBook.setStatus(StudentBookStatus.RETURNED);
-                studentBook.setReturnedDate(LocalDateTime.now());
-                rewrite(list);
-                return 1;
+                int upd = query.executeUpdate();
+                tt.commit();
+                return upd;
+
+            }
+            catch (Exception e){
+                tt.rollback();
+                System.out.println(e.getMessage());
+                return 0;
             }
         }
-        return 0;
     }
 
 
     public List<StudentBook> booksOnHand() {
-        try {
-            Stream<String> stream = Files.lines(Paths.get("student_book.txt"));
-            return stream.filter(line -> {
-                String[] str = line.split("#");
-                return str[5].equals("TAKEN");
-            }).map(line -> {
-                String[] str = line.split("#");
-                StudentBook studentBook = new StudentBook();
-                studentBook.setCreatedDate(LocalDateTime.parse(str[3]));
-                studentBook.setDeadlineDate(LocalDate.parse(str[4]));
-                studentBook.setBook(bookRepository.get(Integer.valueOf(str[2])));
-                studentBook.setStudent(profileRepository.get(Integer.valueOf(str[1])));
-                return studentBook;
-            }).sorted().toList();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        try(Session session = factory.openSession()){
+            Query<StudentBook> query = session.createQuery(
+                    "FROM StudentBook WHERE status =: status", StudentBook.class);
+            query.setParameter("status", StudentBookStatus.TAKEN);
+            return query.getResultList();
         }
     }
 
 
     public List<StudentBook> bookHistory(Integer bId) {
-        try {
-            Stream<String> stream = Files.lines(Paths.get("student_book.txt"));
-            return stream.filter(line -> {
-                String[] str = line.split("#");
-                return Integer.valueOf(str[2]).equals(bId);
-            }).map(line -> {
-                String[] str = line.split("#");
-                StudentBook studentBook = new StudentBook();
-                studentBook.setCreatedDate(LocalDateTime.parse(str[3]));
-                if (str[6] != null) studentBook.setReturnedDate(LocalDateTime.parse(str[6]));
-                studentBook.setStudent(profileRepository.get(Integer.valueOf(str[1])));
-                return studentBook;
-            }).sorted().toList();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        try(Session session = factory.openSession()){
+            Query<StudentBook> query = session.createQuery(
+                    "FROM StudentBook WHERE book.id =: bid", StudentBook.class);
+            query.setParameter("bid", bId);
+            return query.getResultList();
         }
     }
 
     public List<StudentBook> bestBooks() {
-        List<StudentBook> bookList = new LinkedList<>();
-        try {
-            Stream<String> stream = Files.lines(Paths.get("student_book.txt"));
-            bookList = stream.map(line -> {
-                String[] str = line.split("#");
-                StudentBook studentBook = new StudentBook();
-                studentBook.setBook(bookRepository.get(Integer.valueOf(str[2])));
-                return studentBook;
-            }).toList();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        Map<Integer, StudentBook> map = new HashMap<>();
-        bookList.forEach(studentBook -> map.putIfAbsent(studentBook.getBook().getId(), studentBook));
-        for (StudentBook b : bookList) {
-            StudentBook book = map.get(b.getBook().getId());
-            if (book != null) book.setTakenCount(book.getTakenCount() + 1);
-        }
-        List<StudentBook> result = new LinkedList<>(map.values());
-        Comparator<StudentBook> sort = new Comparator<StudentBook>() {
-            @Override
-            public int compare(StudentBook o1, StudentBook o2) {
-                return o1.getTakenCount() - o2.getTakenCount();
-            }
-        };
-        result.sort(sort);
-        return result;
+//        try(Session session = factory.openSession()){
+//            Query<StudentBook> query = session.createQuery(
+//                    "SELECT ", StudentBook.class)
+//        }
+        return new LinkedList<>();
     }
 
     private void rewrite(List<StudentBook> list) {

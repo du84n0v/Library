@@ -37,6 +37,8 @@ public class StudentBookService {
             return;
         }
         StudentBook studentBook = new StudentBook();
+        studentBook.setBook(book);
+        studentBook.setStudent(ComponentContainer.currentProfile);
         studentBook.getBook().setId(bId);
         studentBook.getStudent().setId(profileId);
         studentBook.setCreatedDate(LocalDateTime.now());
@@ -48,7 +50,7 @@ public class StudentBookService {
         if (result == 1) {
             System.out.println("Book taken");
         } else {
-            System.out.println("Error bo'ldi.");
+            System.out.println("Error occurs");
         }
     }
 
@@ -71,28 +73,17 @@ public class StudentBookService {
 
     public void returnBook(Integer bId) {
         Integer sId = ComponentContainer.currentProfile.getId();
-//        StudentBook st = ComponentContainer.studentBookRepository.getStudentBook(sId, bId);
-//        if (st == null) {
-//            System.out.println("No date");
-//            return;
-//        }
-//        int effectedRow = ComponentContainer.studentBookRepository.returnBook(st.getId());
-//        if (effectedRow != 0) {
-//            System.out.println("Book returned");
-//        } else {
-//            System.out.println("Error ...");
-//        }
 
         int effectedRow = studentBookRepository.returnBook(sId, bId);
         if (effectedRow != 0) {
             System.out.println("Book returned");
         } else {
-            System.out.println("Error ...");
+            System.out.println("You've not got this book rent");
         }
     }
 
     public void takenBookHistory() {
-        List<StudentBook> studentBookList = studentBookRepository.studentBookOnHand(ComponentContainer.currentProfile.getId(), null);
+        List<StudentBook> studentBookList = studentBookRepository.studentBookOnHand(ComponentContainer.currentProfile.getId(), StudentBookStatus.TAKEN, StudentBookStatus.RETURNED);
         for (StudentBook st : studentBookList) {
             String title = st.getBook().getTitle();
             String author = st.getBook().getAuthor();
@@ -106,6 +97,10 @@ public class StudentBookService {
 
     public void booksOnHand() {
         List<StudentBook> studentBookList = studentBookRepository.booksOnHand();
+        if(studentBookList.isEmpty()){
+            System.out.println("There is no any book on hand");
+            return;
+        }
         for (StudentBook st : studentBookList) {
             Book book = st.getBook();
             Profile student = st.getStudent();
@@ -120,6 +115,10 @@ public class StudentBookService {
 
     public void bookHistory(Integer bookId) {
         List<StudentBook> studentBookList = studentBookRepository.bookHistory(bookId);
+        if(studentBookList.isEmpty()){
+            System.out.println("There is no any history");
+            return;
+        }
         for (StudentBook st : studentBookList) {
             Profile student = st.getStudent();
 

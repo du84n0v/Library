@@ -43,9 +43,12 @@ public class BookController {
                 case 6:
                     bookHistory();
                     break;
-                case 7:
-                    studentBookService.bestBooks();
+                case 7:{
+                    bookService.bestBooks();
+//                    studentBookService.bestBooks();
                     break;
+                }
+
                 case 0:
                     loop = false;
                     break;

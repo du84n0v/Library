@@ -53,11 +53,7 @@ public class StudentBook implements Comparable<StudentBook> {
         return id + "#" + student.getId() + "#" + book.getId() + "#" + createdDate + "#" + deadlineDate + "#" + status + "#" + returnedDate;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-//    public Integer getStudentId() {
+    //    public Integer getStudentId() {
 //        return studentId;
 //    }
 //

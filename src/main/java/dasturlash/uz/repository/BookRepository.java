@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.awt.*;
+import java.util.LinkedList;
 import java.util.List;
 
 @Repository
@@ -42,13 +43,18 @@ public class BookRepository {
         }
     }
 
-    public List<Book> search(String query) {
+    public List<Book> search(String text) {
+        text = text.trim().toLowerCase();
 
-        query = query.trim().toLowerCase();
-
-        String finalQuery = query;
-        return getAll().stream().filter(book -> book.getVisible() && (
-                book.getAuthor().contains(finalQuery) || book.getTitle().contains(finalQuery))).toList();
+        try (Session session = factory.openSession()) {
+            Query<Book> query = session.createQuery(
+                    "FROM Book WHERE visible = true AND " +
+                            "(lower(title) LIKE :text OR lower(author) LIKE :text)",
+                    Book.class
+            );
+            query.setParameter("text", "%" + text + "%");
+            return query.getResultList();
+        }
     }
 
     public int delete(Integer bookId) {
@@ -96,4 +102,12 @@ public class BookRepository {
         }
     }
 
+    public List<Book> getBestBooks() {
+        try(Session session = factory.openSession()){
+            Query<Book> query = session.createQuery(
+                    "FROM Book WHERE takenCount > 0",
+                    Book.class);
+            return query.getResultList();
+        }
+    }
 }

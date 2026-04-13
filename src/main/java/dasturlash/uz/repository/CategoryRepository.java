@@ -27,8 +27,6 @@ public class CategoryRepository {
     @Autowired
     SessionFactory factory;
 
-    private Integer catId = 1;
-
     public Category getByName(String name) {
         try(Session session = factory.openSession()){
             Query<Category> query = session.createQuery("FROM Category WHERE name =: name", Category.class);
